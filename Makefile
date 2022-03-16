@@ -11,4 +11,5 @@ include ./provider.mk
 
 test::
 	cargo clippy --all-targets --all-features
+	RUST_BACKTRACE=1 cargo test -- --nocapture
 

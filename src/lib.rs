@@ -1,10 +1,11 @@
 use aws_sdk_dynamodb::model::AttributeValue;
+use aws_sdk_dynamodb::output::ScanOutput;
 use chrono::{Duration, Utc};
 use futures::TryFutureExt;
+use kvdynamodb::{GetResponse, SetRequest};
 use log::debug;
 use wasmbus_rpc::core::LinkDefinition;
 use wasmbus_rpc::error::{RpcError, RpcResult};
-use kvdynamodb::{GetResponse, SetRequest};
 
 pub use config::AwsConfig;
 
@@ -129,5 +130,37 @@ impl DynamoDbClient {
             .await?;
 
         Ok(true)
+    }
+
+    pub async fn keys(&self) -> RpcResult<Vec<String>> {
+        let sdk_response: ScanOutput = self
+            .client
+            .scan()
+            .table_name(&self.table_name)
+            .projection_expression(&self.key_attribute)
+            .send()
+            .map_err(|e| RpcError::from(e.to_string()))
+            .await?;
+
+        match sdk_response.items {
+            Some(items) => items
+                .iter()
+                .map(|i| {
+                    let av = i.get(self.key_attribute.as_str()).ok_or_else(|| {
+                        RpcError::Other(format!(
+                            "record has no key attribute {}",
+                            self.key_attribute
+                        ))
+                    })?;
+
+                    let key = av.as_s().map_err(|_| {
+                        RpcError::Other(format!("key {} is not a string", self.key_attribute))
+                    })?;
+
+                    Ok(key.clone())
+                })
+                .collect(),
+            None => Ok(Vec::new()),
+        }
     }
 }

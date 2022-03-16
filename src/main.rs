@@ -1,12 +1,14 @@
 //! kvdynamodb-provider capability provider
 //!
 //!
-use std::{collections::HashMap, convert::Infallible};
+use kvdynamodb::{
+    GetResponse, KeysRequest, KvDynamoDb, KvDynamoDbReceiver, SetRequest, StringList,
+};
+use kvdynamodb_lib::{AwsConfig, DynamoDbClient};
 use std::sync::Arc;
+use std::{collections::HashMap, convert::Infallible};
 use tokio::sync::RwLock;
 use wasmbus_rpc::provider::prelude::*;
-use kvdynamodb::{GetResponse, KeysRequest, KvDynamoDb, KvDynamoDbReceiver, SetRequest, StringList};
-use kvdynamodb_lib::{AwsConfig, DynamoDbClient};
 
 // main (via provider_main) initializes the threaded tokio executor,
 // listens to lattice rpcs, handles actor links,
@@ -84,7 +86,11 @@ impl ProviderHandler for KvDynamoDbProvider {
 /// Handle Factorial methods
 #[async_trait]
 impl KvDynamoDb for KvDynamoDbProvider {
-    async fn get<TS: ToString + ?Sized + Sync>(&self, ctx: &Context, arg: &TS) -> RpcResult<GetResponse> {
+    async fn get<TS: ToString + ?Sized + Sync>(
+        &self,
+        ctx: &Context,
+        arg: &TS,
+    ) -> RpcResult<GetResponse> {
         let client = self.client(ctx).await?;
         client.get(arg).await
     }
