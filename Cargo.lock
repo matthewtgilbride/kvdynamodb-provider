@@ -1364,6 +1364,7 @@ dependencies = [
  "base64",
  "chrono",
  "futures 0.3.21",
+ "http",
  "kvdynamodb",
  "log",
  "rand 0.8.5",

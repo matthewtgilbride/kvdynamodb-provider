@@ -1,9 +1,12 @@
 use aws_sdk_dynamodb::model::AttributeValue;
 use aws_sdk_dynamodb::output::ScanOutput;
+use aws_sdk_dynamodb::Endpoint;
 use chrono::{Duration, Utc};
 use futures::TryFutureExt;
+use http::Uri;
 use kvdynamodb::{GetResponse, SetRequest};
 use log::debug;
+use std::env;
 use wasmbus_rpc::core::LinkDefinition;
 use wasmbus_rpc::error::{RpcError, RpcResult};
 
@@ -23,8 +26,16 @@ pub struct DynamoDbClient {
 
 impl DynamoDbClient {
     pub async fn new(config: config::AwsConfig, ld: Option<LinkDefinition>) -> Self {
-        let dynamo_config = aws_sdk_dynamodb::Config::from(&config.clone().configure_aws().await);
-        let dynamo_client = aws_sdk_dynamodb::Client::from_conf(dynamo_config);
+        let mut dynamo_config =
+            aws_sdk_dynamodb::config::Builder::from(&config.clone().configure_aws().await);
+        if let Ok(local_uri) = env::var("AWS_DYNAMODB_LOCAL_URI") {
+            let local_uri = local_uri
+                .parse::<Uri>()
+                .expect("AWS_DYNAMODB_LOCAL_URI is not a valid uri");
+            dynamo_config = dynamo_config.endpoint_resolver(Endpoint::immutable(local_uri))
+        }
+
+        let dynamo_client = aws_sdk_dynamodb::Client::from_conf(dynamo_config.build());
         DynamoDbClient {
             client: dynamo_client,
             table_name: config.table_name.clone(),

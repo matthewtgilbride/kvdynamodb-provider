@@ -1,9 +1,9 @@
+use kvdynamodb::*;
 use std::time::Duration;
 use wasmbus_rpc::{
     error::{RpcError, RpcResult},
     provider::prelude::Context,
 };
-use kvdynamodb::*;
 use wasmcloud_test_util::{
     check, check_eq,
     cli::print_test_results,
@@ -49,7 +49,7 @@ async fn set<T1: ToString, T2: ToString>(
             ..Default::default()
         },
     )
-        .await
+    .await
 }
 
 /// test that health check returns healthy
