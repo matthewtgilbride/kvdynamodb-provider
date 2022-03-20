@@ -105,7 +105,8 @@ impl KvDynamoDb for KvDynamoDbProvider {
         client.del(arg).await
     }
 
-    async fn keys(&self, _ctx: &Context, _arg: &KeysRequest) -> RpcResult<StringList> {
-        todo!()
+    async fn keys(&self, ctx: &Context, _arg: &KeysRequest) -> RpcResult<StringList> {
+        let client = self.client(ctx).await?;
+        client.keys().await
     }
 }

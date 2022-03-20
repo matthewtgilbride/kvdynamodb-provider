@@ -5,7 +5,7 @@ use chrono::{Duration, Utc};
 use futures::TryFutureExt;
 use http::Uri;
 use kvdynamodb::{GetResponse, SetRequest};
-use log::debug;
+use log::{debug, error};
 use std::env;
 use wasmbus_rpc::core::LinkDefinition;
 use wasmbus_rpc::error::{RpcError, RpcResult};
@@ -144,6 +144,8 @@ impl DynamoDbClient {
     }
 
     pub async fn keys(&self) -> RpcResult<Vec<String>> {
+        error!("*****keys*****");
+
         let sdk_response: ScanOutput = self
             .client
             .scan()
