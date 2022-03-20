@@ -85,8 +85,8 @@ async fn get_set(_opt: &TestOptions) -> RpcResult<()> {
     check_eq!(get_resp.value.as_str(), VALUE)?;
 
     let keys_resp = kv.keys(&ctx, &KeysRequest::default()).await?;
-    check_eq!(keys_resp.len(), 1)?;
-    check_eq!(keys_resp[0], key)?;
+    check_eq!(keys_resp.keys.len(), 1)?;
+    check_eq!(keys_resp.keys[0], key)?;
 
     let _ = kv.del(&ctx, &key).await?;
 

@@ -1,12 +1,14 @@
+use std::collections::HashMap;
+use std::env;
+
 use aws_sdk_dynamodb::model::AttributeValue;
 use aws_sdk_dynamodb::output::ScanOutput;
 use aws_sdk_dynamodb::Endpoint;
 use chrono::{Duration, Utc};
 use futures::TryFutureExt;
 use http::Uri;
-use kvdynamodb::{GetResponse, SetRequest};
-use log::{debug, error};
-use std::env;
+use kvdynamodb::{GetResponse, KeysRequest, KeysResponse, SetRequest};
+use log::debug;
 use wasmbus_rpc::core::LinkDefinition;
 use wasmbus_rpc::error::{RpcError, RpcResult};
 
@@ -143,8 +145,19 @@ impl DynamoDbClient {
         Ok(true)
     }
 
-    pub async fn keys(&self) -> RpcResult<Vec<String>> {
-        error!("*****keys*****");
+    pub async fn keys(&self, arg: &KeysRequest) -> RpcResult<KeysResponse> {
+        let sdk_request = self
+            .client
+            .scan()
+            .table_name(&self.table_name)
+            .projection_expression(&self.key_attribute);
+
+        arg.cursor.clone().map(|c| {
+            sdk_request.set_exclusive_start_key(Some(HashMap::from([(
+                self.clone().key_attribute,
+                AttributeValue::S(c),
+            )])))
+        });
 
         let sdk_response: ScanOutput = self
             .client
@@ -155,7 +168,7 @@ impl DynamoDbClient {
             .map_err(|e| RpcError::from(e.to_string()))
             .await?;
 
-        match sdk_response.items {
+        let keys: Result<Vec<String>, RpcError> = match sdk_response.items {
             Some(items) => items
                 .iter()
                 .map(|i| {
@@ -174,6 +187,19 @@ impl DynamoDbClient {
                 })
                 .collect(),
             None => Ok(Vec::new()),
+        };
+
+        match keys {
+            Err(e) => Err(RpcError::Other(e.to_string())),
+            Ok(ks) => {
+                let cursor = match sdk_response.last_evaluated_key {
+                    None => None,
+                    Some(hash_map) => hash_map
+                        .get(&self.key_attribute)
+                        .map(|v| v.as_s().unwrap().clone()),
+                };
+                Ok(KeysResponse { keys: ks, cursor })
+            }
         }
     }
 }

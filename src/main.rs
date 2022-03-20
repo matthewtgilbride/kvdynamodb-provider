@@ -2,7 +2,7 @@
 //!
 //!
 use kvdynamodb::{
-    GetResponse, KeysRequest, KvDynamoDb, KvDynamoDbReceiver, SetRequest, StringList,
+    GetResponse, KeysRequest, KeysResponse, KvDynamoDb, KvDynamoDbReceiver, SetRequest,
 };
 use kvdynamodb_lib::{AwsConfig, DynamoDbClient};
 use std::sync::Arc;
@@ -105,8 +105,8 @@ impl KvDynamoDb for KvDynamoDbProvider {
         client.del(arg).await
     }
 
-    async fn keys(&self, ctx: &Context, _arg: &KeysRequest) -> RpcResult<StringList> {
+    async fn keys(&self, ctx: &Context, arg: &KeysRequest) -> RpcResult<KeysResponse> {
         let client = self.client(ctx).await?;
-        client.keys().await
+        client.keys(&arg).await
     }
 }
