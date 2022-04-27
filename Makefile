@@ -11,23 +11,24 @@ include ./provider.mk
 
 delete-test-table:
 	aws dynamodb delete-table \
-		--endpoint-url http://localhost:8000 \
 		--table-name kvdynamodb \
+		--endpoint-url http://localhost:8000
 
 
 create-test-table:
 	aws dynamodb create-table \
-		--endpoint-url http://localhost:8000 \
     	--table-name kvdynamodb \
-    	--attribute-definitions AttributeName=K,AttributeType=S \
-    	--key-schema AttributeName=K,KeyType=HASH \
-    	--provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1
+    	--attribute-definitions AttributeName=key,AttributeType=S \
+    	--key-schema AttributeName=key,KeyType=HASH \
+    	--provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1 \
+		--endpoint-url http://localhost:8000
 
-test:: export TABLE_NAME=kvdynamodb
-test:: export KEY_ATTRIBUTE=K
-test:: export VALUE_ATTRIBUTE=V
 test:: export AWS_DYNAMODB_LOCAL_URI=http://localhost:8000
+test:: export TABLE_NAME=kvdynamodb
+test:: export KEY_ATTRIBUTE=key
+test:: export VALUE_ATTRIBUTE=value
 test::
+	-ps -ax | grep -i kvdynamodb_provider | awk '{print $$1}' | xargs kill -9
 	docker-compose down
 	docker-compose up -d
 	${MAKE} create-test-table

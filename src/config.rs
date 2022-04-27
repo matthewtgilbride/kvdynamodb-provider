@@ -160,7 +160,7 @@ fn get_required_attr_from_env(name: &str) -> Result<String, RpcError> {
             Ok(v)
         }
         Err(_) => {
-            error!("{}", format!("*** could not value for env var {}", name));
+            error!("{}", format!("*** could not find value for env var {}", name));
             Err(RpcError::InvalidParameter(format!(
                 "The configuration value {} must be provided in the link definition or available as an environment variable",
                 name

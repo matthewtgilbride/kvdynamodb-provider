@@ -107,6 +107,6 @@ impl KvDynamoDb for KvDynamoDbProvider {
 
     async fn keys(&self, ctx: &Context, arg: &KeysRequest) -> RpcResult<KeysResponse> {
         let client = self.client(ctx).await?;
-        client.keys(&arg).await
+        client.keys(arg).await
     }
 }

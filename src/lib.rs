@@ -146,24 +146,21 @@ impl DynamoDbClient {
     }
 
     pub async fn keys(&self, arg: &KeysRequest) -> RpcResult<KeysResponse> {
-        let sdk_request = self
+        let mut sdk_request = self
             .client
             .scan()
             .table_name(&self.table_name)
-            .projection_expression(&self.key_attribute);
+            .projection_expression("#k")
+            .expression_attribute_names("#k", &self.key_attribute);
 
-        arg.cursor.clone().map(|c| {
-            sdk_request.set_exclusive_start_key(Some(HashMap::from([(
+        if let Some(c) = &arg.cursor {
+            sdk_request = sdk_request.set_exclusive_start_key(Some(HashMap::from([(
                 self.clone().key_attribute,
-                AttributeValue::S(c),
-            )])))
-        });
+                AttributeValue::S(c.to_string()),
+            )])));
+        }
 
-        let sdk_response: ScanOutput = self
-            .client
-            .scan()
-            .table_name(&self.table_name)
-            .projection_expression(&self.key_attribute)
+        let sdk_response: ScanOutput = sdk_request
             .send()
             .map_err(|e| RpcError::from(e.to_string()))
             .await?;

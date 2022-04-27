@@ -11,3 +11,7 @@ services:
       - "6222:6222"
       - "8222:8222"
     command: [ "-js" ]
+  registry:
+    image: registry:2
+    ports:
+      - "5000:5000"
