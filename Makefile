@@ -35,3 +35,8 @@ test::
 	cargo clippy --all-targets --all-features
 	RUST_BACKTRACE=1 cargo test -- --nocapture
 
+push-gh:
+	wash reg push -u matthewtgilbride -p $$GH_PERSONAL_ACCESS_TOKEN \
+    ghcr.io/matthewtgilbride/kvdynamodb_provider:0.1.0 \
+    build/kvdynamodb_provider.par.gz
+
