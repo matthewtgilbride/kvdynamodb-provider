@@ -77,6 +77,7 @@ impl AwsConfig {
                 table_name: get_required_attr_from_env("TABLE_NAME")?,
                 key_attribute: get_required_attr_from_env("KEY_ATTRIBUTE")?,
                 value_attribute: get_required_attr_from_env("VALUE_ATTRIBUTE")?,
+                ttl_attribute: get_optional_attr_from_env("TTL_ATTRIBUTE")?,
                 ..AwsConfig::default()
             }
         };
@@ -165,6 +166,20 @@ fn get_required_attr_from_env(name: &str) -> Result<String, RpcError> {
                 "The configuration value {} must be provided in the link definition or available as an environment variable",
                 name
             )))
+        }
+    }
+}
+
+fn get_optional_attr_from_env(name: &str) -> Result<Option<String>, RpcError> {
+    let try_env = env::var(name);
+    match try_env {
+        Ok(v) => {
+            info!("{}", format!("*** found value {} for env var {}", v, name));
+            Ok(Some(v))
+        }
+        Err(_) => {
+            info!("{}", format!("*** could not find value for env var {}", name));
+            Ok(None)
         }
     }
 }

@@ -22,11 +22,16 @@ create-test-table:
     	--key-schema AttributeName=key,KeyType=HASH \
     	--provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1 \
 		--endpoint-url http://localhost:8000
+	aws dynamodb update-time-to-live \
+		--table-name kvdynamodb \
+		--time-to-live-specification "Enabled=true, AttributeName=ttl" \
+		--endpoint-url http://localhost:8000
 
 test:: export AWS_DYNAMODB_LOCAL_URI=http://localhost:8000
 test:: export TABLE_NAME=kvdynamodb
 test:: export KEY_ATTRIBUTE=key
 test:: export VALUE_ATTRIBUTE=value
+test:: export TTL_ATTRIBUTE=ttl
 test::
 	-ps -ax | grep -i kvdynamodb_provider | awk '{print $$1}' | xargs kill -9
 	docker-compose down
