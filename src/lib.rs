@@ -151,14 +151,17 @@ impl DynamoDbClient {
             .scan()
             .table_name(&self.table_name)
             .projection_expression("#k")
-            .expression_attribute_names("#k", &self.key_attribute)
-            .limit(100);
+            .expression_attribute_names("#k", &self.key_attribute);
 
         if let Some(c) = &arg.cursor {
             sdk_request = sdk_request.set_exclusive_start_key(Some(HashMap::from([(
                 self.clone().key_attribute,
                 AttributeValue::S(c.to_string()),
             )])));
+        }
+
+        if let Some(l) = &arg.limit {
+            sdk_request = sdk_request.limit(*l as i32);
         }
 
         let sdk_response: ScanOutput = sdk_request

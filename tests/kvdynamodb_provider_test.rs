@@ -137,10 +137,14 @@ async fn keys_paging(_opt: &TestOptions) -> RpcResult<()> {
         set(&kv, &ctx, &key, VALUE, None).await?;
     }
 
-    let keys_resp = kv.keys(&ctx, &KeysRequest::default()).await?;
+    let keys_resp = kv.keys(&ctx, &KeysRequest {
+        cursor: None,
+        limit: Some(100)
+    }).await?;
     assert!(keys_resp.cursor.is_some());
     let page_resp = kv.keys(&ctx, &KeysRequest {
-        cursor: keys_resp.cursor
+        cursor: keys_resp.cursor,
+        limit: None,
     }).await?;
 
     assert_eq!(keys_resp.keys.len(), 100);
