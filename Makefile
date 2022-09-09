@@ -42,11 +42,11 @@ test::
 
 push-gh-arm:
 	wash reg push -u matthewtgilbride -p $$GH_PERSONAL_ACCESS_TOKEN \
-    ghcr.io/matthewtgilbride/kvdynamodb_provider_arm:0.1.0 \
+    ghcr.io/matthewtgilbride/kvdynamodb_provider_arm:0.1.1 \
     build/kvdynamodb_provider.par.gz
 
 push-gh-x86:
 	wash reg push -u matthewtgilbride -p $$GH_PERSONAL_ACCESS_TOKEN \
-    ghcr.io/matthewtgilbride/kvdynamodb_provider_x86:0.1.0 \
+    ghcr.io/matthewtgilbride/kvdynamodb_provider_x86:0.1.1 \
     build/kvdynamodb_provider.par.gz
 

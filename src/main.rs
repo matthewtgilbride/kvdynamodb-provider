@@ -15,7 +15,8 @@ use wasmbus_rpc::provider::prelude::*;
 // and returns only when it receives a shutdown message
 //
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    provider_main(KvDynamoDbProvider::default())?;
+    provider_main(KvDynamoDbProvider::default(),
+                  Some("kvdynamodb".to_string()))?;
 
     eprintln!("kvdynamodb-provider provider exiting");
     Ok(())
